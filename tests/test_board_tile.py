@@ -54,3 +54,15 @@ class TestBoardTile(unittest.TestCase):
 
     def test_Init_BoardTileInvalidString_RaiseValueError(self):
         self.assertRaises(ValueError, core.BoardTile, "testing")
+
+    def test_Equality_ZeroAndZero_True(self):
+        tile1 = core.BoardTile(core.BoardTile.zero)
+        tile2 = core.BoardTile(core.BoardTile.zero)
+        self.assertTrue(tile1 == tile2)
+        self.assertTrue(tile1 == str(tile2))
+
+    def test_InEquality_ZeroAndOne_False(self):
+        tile1 = core.BoardTile(core.BoardTile.zero)
+        tile2 = core.BoardTile(core.BoardTile.one)
+        self.assertFalse(tile1 == tile2)
+        self.assertFalse(tile1 == str(tile2))
