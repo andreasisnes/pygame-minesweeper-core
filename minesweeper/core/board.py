@@ -9,6 +9,9 @@ import time
 
 class Board:
     def __init__(self, rows: int, cols: int, mines: int):
+        rows, cols, mines = int(rows), int(cols), int(mines)
+        if mines > ((rows * cols) - 9):
+            raise ValueError(f"Too mines compared to free tiles")
         self._cols = cols
         self._rows = rows
         self._mines = mines
@@ -50,31 +53,31 @@ class Board:
                 return self.__tiles_open_adjacent__(i, j, [self._tiles[i][j]])
             return [self._tiles[i][j]]
 
-    def tile_valid(self, row, col):
+    def tile_valid(self, i: int, j: int):
         return (
             True
-            if (row >= 0 and row < self.rows) and (col >= 0 and col < self.cols)
+            if (i >= 0 and i < self.rows) and (j >= 0 and j < self.cols)
             else False
         )
 
     @property
-    def is_game_over(self):
+    def is_game_over(self) -> bool:
         return self._is_game_over
 
     @property
-    def is_game_finished(self):
+    def is_game_finished(self) -> bool:
         return self._is_game_finished
 
     @property
-    def rows(self):
+    def rows(self) -> int:
         return self._rows
 
     @property
-    def cols(self):
+    def cols(self) -> int:
         return self._cols
 
     @property
-    def mines(self):
+    def mines(self) -> int:
         return self._mines
 
     @property
@@ -84,7 +87,7 @@ class Board:
         )
 
     @property
-    def timer(self):
+    def timer(self) -> float:
         if self.is_game_over or self.is_game_finished:
             return self._timer1 - self._timer if self._opened > 0 else 0.0
         return time.time() - self._timer if self._opened > 0 else 0.0
@@ -109,8 +112,6 @@ class Board:
 
     def __tiles_open_adjacent__(self, row: int, col: int, opened: List[BoardTile]):
         if self.tile_valid(row, col):
-            if self._board[row][col].type == BoardTile.mine:
-                return [self._board[row][col]]
             for i in [row, row + 1, row - 1]:
                 for j in [col, col + 1, col - 1]:
                     if (

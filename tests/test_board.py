@@ -2,14 +2,14 @@ import unittest
 import random
 
 try:
-    from .context import minesweeper
-except ImportError:
     from context import minesweeper
+except ImportError:
+    from .context import minesweeper
 core = minesweeper.core
 
 
 class TestBoard(unittest.TestCase):
-    num_random_test = 50
+    num_random_test = 10
     lower_bound = 10
     upper_bound = 30
 
@@ -88,15 +88,17 @@ class TestBoard(unittest.TestCase):
             rows, cols, mines = self.random_params
             board = core.Board(rows, cols, mines)
             tile_i, tile_j = random.randint(0, rows - 1), random.randint(0, cols - 1)
-            board.tile_open(tile_i, tile_j)
             self.assertFalse(board.is_game_finished)
             self.assertFalse(board.is_game_over)
+            board.tile_open(tile_i, tile_j)
             for i in range(rows):
                 for j in range(cols):
                     if board._board[i][j].type != core.BoardTile.mine:
                         board.tile_open(i, j)
+                        self.assertEqual(0, len(board.tile_open(i, j)))
             self.assertTrue(board.is_game_finished)
             self.assertFalse(board.is_game_over)
+            self.assertEqual(0, len(board.tile_open(tile_i, tile_j)))
 
     def test_IsGameOver_OpenMine_IsGameOverShouldBeSetToTrue(self):
         for _ in range(self.num_random_test):
@@ -124,17 +126,53 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(len(board._tiles), rows)
         self.assertEqual(len(board._tiles[0]), cols)
 
+    def test_StrBoard_Board_VerifyString(self):
+        for _ in range(self.num_random_test):
+            rows, cols, mines = self.random_params
+            board = core.Board(rows, cols, mines)
+            tile_i, tile_j = random.randint(0, rows - 1), random.randint(0, cols - 1)
+            board.tile_open(tile_i, tile_j)
+            strBoard = str(board)
+            entries = strBoard.replace("\n", " ").split(" ")
+            for i in range(rows):
+                for j in range(cols):
+                    self.assertEqual(entries[(i * cols) + j], board._tiles[i][j].type)
+
+    def test_StrSolution_Board_VerifyString(self):
+        for _ in range(self.num_random_test):
+            rows, cols, mines = self.random_params
+            board = core.Board(rows, cols, mines)
+            tile_i, tile_j = random.randint(0, rows - 1), random.randint(0, cols - 1)
+            board.tile_open(tile_i, tile_j)
+            strBoard = str(board.solution)
+            entries = strBoard.replace("\n", " ").split(" ")
+            for i in range(rows):
+                for j in range(cols):
+                    self.assertEqual(entries[(i * cols) + j], board._board[i][j].type)
+
+    def test_InitBoard_InvalidParameters_RaiseTypeError(self):
+        with self.assertRaises(ValueError):
+            core.Board(5, 5, 20)
+
+    def test_OpenTile_Timer_ShouldStart(self):
+        for _ in range(self.num_random_test):
+            rows, cols, mines = self.random_params
+            board = core.Board(rows, cols, mines)
+            tile_i, tile_j = random.randint(0, rows - 1), random.randint(0, cols - 1)
+            board.tile_open(tile_i, tile_j)
+            self.assertGreaterEqual(board.timer, 0.0)
+
     @property
     def random_params(self):
         return self.random_rows, self.random_cols, self.random_mines
 
     @property
     def random_cols(self):
-        return random.randint(self.lower_bound, self.upper_bound)
+        return random.randint(self.lower_bound + 3, self.upper_bound)
 
     @property
     def random_rows(self):
-        return random.randint(self.lower_bound, self.upper_bound)
+        return random.randint(self.lower_bound + 3, self.upper_bound)
 
     @property
     def random_mines(self):

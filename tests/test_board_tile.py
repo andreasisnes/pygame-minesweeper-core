@@ -1,9 +1,9 @@
 import unittest
 
 try:
-    from context import minesweeper
-except ImportError:
     from .context import minesweeper
+except ImportError:
+    from context import minesweeper
 core = minesweeper.core
 
 

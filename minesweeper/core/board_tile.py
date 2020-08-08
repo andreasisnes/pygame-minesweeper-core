@@ -60,5 +60,5 @@ class BoardTile:
     def __str__(self):
         return self.__tile
 
-    def __eq__(self, tile: Union[str, "BoardTile"]):
+    def __eq__(self, tile: Union[str, int, "BoardTile"]):
         return str(self) == str(tile)
