@@ -31,7 +31,7 @@ stages:
         python -m pip install -U pipenv
         make init
       displayName: 'Restoring dependencies'
-    - script: pipenv run pytest tests/ --cov=minesweeper --cov-report html --test-run-title="(Build.Repository.Name)-$(Build.BuildNumber)"
+    - script: pipenv run pytest tests/ --cov=minesweeper --cov-report html --test-run-title="$(Build.Repository.Name)-$(Build.BuildNumber)"
       displayName: 'Running Unit tests'
     - script: make egg
       displayName: 'Creating Python egg'
