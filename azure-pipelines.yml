@@ -1,10 +1,67 @@
-# Python package
-# Create and test a Python package on multiple Python versions.
-# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/python
-
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+name: 1.0.$(rev:r)
+
+variables:
+  artifactName: 'python-egg'
+  version: $(Build.BuildNumber)
+  pypiIndex: pygame-minesweeper-core
+  pythonVersion: '3.6'
+
+stages:
+- stage: ContinuousIntegration
+  displayName: 'Continuous Integration'
+  jobs:
+  - job: Building
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Using Python ${{ variables.pythonVersion }}'
+      inputs:
+        versionSpec: $(pythonVersion)
+    - task: FileTransform@2
+      displayName: 'Setting metadata'
+      inputs:
+        folderPath: '$(Build.SourcesDirectory)/'
+        xmlTransformationRules:
+        jsonTargetFiles: '**/metadata.json'
+    - script: |
+        python -m pip install -U pipenv
+        make init
+      displayName: 'Restoring dependencies'
+    - script: make test
+      displayName: 'Running Unit tests'
+    - script: make egg
+      displayName: 'Creating Python egg'
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publishing artifact'
+      inputs:
+        targetPath: '$(Build.Repository.LocalPath)/dist'
+        artifact: '$(artifactName)'
+        publishLocation: 'pipeline'
+
+- stage: ContinuousDelivery
+  displayName: 'Continuous Delivery'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  jobs:
+  - deployment: Publishing
+    displayName: 'Publishing'
+    environment: 'Elitekollektivet'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: UsePythonVersion@0
+            displayName: 'Using Python ${{ variables.pythonVersion }}'
+            inputs:
+              versionSpec: $(pythonVersion)
+          - script: python -m pip install --user --upgrade twine
+            displayName: 'Installing twine'
+          - task: TwineAuthenticate@1
+            displayName: 'Authenticating Pypi'
+            inputs:
+              pythonUploadServiceConnection: $(pypiIndex)
+          - script: python -m twine upload --repository $(pypiIndex) --config-file $(PYPIRC_PATH) $(Pipeline.Workspace)/$(artifactName)/*
+            displayName: 'Publishing Python egg'
