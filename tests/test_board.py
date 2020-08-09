@@ -110,9 +110,11 @@ class TestBoard(unittest.TestCase):
             for i in range(rows):
                 for j in range(cols):
                     if board._board[i][j] == core.BoardTile.mine:
-                        board.tile_open(i, j)
+                        mine = board.tile_open(i, j)
+                        self.assertEqual(mine[0].type, mine[0].mine)
                         if not board.is_game_finished:
                             self.assertTrue(board.is_game_over)
+                            return
 
     def test_InitBoard_NewBoard_VerifyDims(self):
         rows, cols, mines = self.random_params

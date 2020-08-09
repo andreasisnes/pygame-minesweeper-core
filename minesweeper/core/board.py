@@ -51,7 +51,7 @@ class Board:
         elif self._tiles[i][j].number >= 0:
             if self._tiles[i][j].number == 0:
                 return self.__tiles_open_adjacent__(i, j, [self._tiles[i][j]])
-            return [self._tiles[i][j]]
+        return [self._tiles[i][j]]
 
     def tile_valid(self, i: int, j: int):
         return (
