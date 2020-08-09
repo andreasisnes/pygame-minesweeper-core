@@ -112,6 +112,9 @@ class Board:
 
     def __tiles_open_adjacent__(self, row: int, col: int, opened: List[BoardTile]):
         if self.tile_valid(row, col):
+            if self._board[row][col] == BoardTile.mine:
+                self._tiles[row][col] = self._board[row][col]
+                return [BoardTile(BoardTile.mine, row, col)]
             for i in [row, row + 1, row - 1]:
                 for j in [col, col + 1, col - 1]:
                     if (
