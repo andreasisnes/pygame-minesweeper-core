@@ -45,7 +45,7 @@ class Board:
         self._tiles[i][j] = self._board[i][j]
         if (self._opened + self.mines) == (self.rows * self.cols):
             self._is_game_finished = True
-            self.timer1 = time.time()
+            self._timer1 = time.time()
         if self._tiles[i][j].type == BoardTile.mine:
             self._is_game_over = True
             self._timer1 = time.time()
