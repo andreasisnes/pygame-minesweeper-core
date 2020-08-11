@@ -37,6 +37,7 @@ class Board:
         if self._tiles[i][j].type != BoardTile.unopened:
             return []
         if self._opened == 0:
+            self._timer = time.time()
             self.__tiles_adjust__(i, j)
             self.__tiles_numerate__()
 
